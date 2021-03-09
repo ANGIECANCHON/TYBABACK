@@ -3,24 +3,40 @@ const User = use('App/Models/User')
 
 class UserController {
 
-    async login(request, response) {
+    async login({ request : { body }, auth}) {
+        let email = body.email
+        let password = body.password
+
+        try {
+            if (await auth.attempt(email, password)) {
+              let user = await User.findBy('email', email)
+              let accessToken = await auth.generate(user)
+              return { success: true, "user":user, "access_token": accessToken }
+            }
+  
+          }
+          catch (err) {
+            return {success: false, message: 'Invalid user'}
+          }
 
     }
 
-    async register( { request } ) {
-        request = request._body
+    async register( { request : { body }, auth} ) {
 
-        const user = new User()
-        user.username = request.username
-        user.email = request.email
-        user.password = request.password
-        user.address = request.address
+        let user = new User()
+        user.username = body.username
+        user.email = body.email
+        user.password = body.password
+        user.address = body.address
 
-        const findUser = await User.findBy('email', request.email)
+        const findUser = await User.findBy('email', body.email)
         if (findUser) {
             return { success: false, message: "user already exist" }
         }
-        return { success: true, data: await user.save() }
+
+        await user.save()
+        let accessToken = await auth.generate(user)
+        return { success: true, "user": user, "access_token": accessToken }
     }
 }
 
