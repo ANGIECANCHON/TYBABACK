@@ -22,3 +22,12 @@ to run the app you can use
 ```js
 npm start
 ```
+
+### Documentation
+you can use for documentation, Index of documentation is into
+
+documentation/index.html
+
+```js
+npm run apidoc
+```
